@@ -12,6 +12,9 @@ import json
 import os
 import requests
 
+import base64
+
+
 import visuals
 import solarlogic
 
@@ -82,8 +85,52 @@ def render_dashboard_footer(key_suffix, t_date, s_time, aqi_enabled, r_t, s_t, n
     st.plotly_chart(fig, use_container_width=True, key=f"chart_{key_suffix}")
 
 
+# --- HELPER FUNCTION (Place this near the top of app.py) ---
+def get_base64_image(path):
+    with open(path, "rb") as img_file:
+        return base64.b64encode(img_file.read()).decode()
+
 # --- PAGE ROUTING ---
 if st.session_state.page == "home":
+    # 1. Global CSS to remove Streamlit top padding and control logo/text spacing
+    st.markdown("""
+        <style>
+        /* This removes the massive gap at the very top of the window */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 0rem !important;
+        }
+        
+        /* Centering the logo and removing vertical margins */
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -20px;
+            margin-bottom: -40px; /* Pulls the title up closer to the logo */
+        }
+        
+        .logo-wrapper img {
+            width: 300px; /* Controls the size of your logo */
+            height: auto;
+        }
+
+        .flowstate-title {
+            margin-top: 0px !important;
+            padding-top: 0px !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # 2. Render Logo using the helper function
+    try:
+        encoded_logo = get_base64_image("flowstate_logo.png")
+        st.markdown(
+            f'<div class="logo-wrapper"><img src="data:image/png;base64,{encoded_logo}"></div>', 
+            unsafe_allow_html=True
+        )
+    except FileNotFoundError:
+        st.error("Logo file not found. Ensure 'flowstate_logo.png' is in your project folder.")
     st.markdown(
             """
             <style>
@@ -162,6 +209,22 @@ else:
     target_date = date.today()
 
     with st.sidebar:
+
+        try:
+            sidebar_logo = get_base64_image("flowstate_logo.png")
+            st.markdown(
+                f"""
+                <div style="display: flex; justify-content: center; margin-bottom: -20px;">
+                    <img src="data:image/png;base64,{sidebar_logo}" width="150">
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        except FileNotFoundError:
+            pass # Fails silently if logo is missing in sidebar
+
+
+
         st.markdown(
             """
             <style>
@@ -509,4 +572,3 @@ else:
                                                 📈 <b>Evaporation Reduction:</b> <span style="color: #f39c12;">{res['savings']['evap']}</span>
                                         </div>
                                 """, unsafe_allow_html=True)
-                            
