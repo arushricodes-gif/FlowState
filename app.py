@@ -84,9 +84,55 @@ def render_dashboard_footer(key_suffix, t_date, s_time, aqi_enabled, r_t, s_t, n
 
 # --- PAGE ROUTING ---
 if st.session_state.page == "home":
-    st.markdown('<h1 class="main-title" style="text-align: center;">☀️ FlowState ☀️</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; font-style: italic; color: #F39C12; font-size: 1.2rem;">Guided by light, sustained by water.</p>', unsafe_allow_html=True)
-    
+    st.markdown(
+            """
+            <style>
+            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+            
+            /* Load Akira for headers */
+            @font-face {
+                font-family: 'Akira';
+                src: url('https://fonts.cdnfonts.com/s/62983/Akira Expanded Demo.woff');
+            }
+
+            /* Global font override for readability */
+            html, body, [class*="st-at"], [class*="st-ae"] {
+                font-family: 'Poppins', sans-serif !important;
+            }
+
+            .flowstate-title {
+                font-family: 'Akira', sans-serif;
+                font-size: 80px;
+                font-weight: 900;
+                color: #F39C12;
+                text-align: center;
+                text-transform: uppercase;
+                letter-spacing: 15px;
+                line-height: 1.1;
+                margin-bottom: 10px;
+                background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                filter: drop-shadow(0px 0px 20px rgba(243, 156, 18, 0.4));
+            }
+
+            .flowstate-subtitle {
+                font-family: 'Poppins', sans-serif;
+                color: #F39C12;
+                text-align: center;
+                font-size: 1.2rem;
+                font-weight: 300;
+                letter-spacing: 4px;
+                text-transform: uppercase;
+                margin-top: -20px;
+                margin-bottom: 40px;
+            }
+            </style>
+            <h1 class="flowstate-title">FLOW STATE</h1>
+            <p class="flowstate-subtitle">Guided by light • Sustained by water</p>
+            """, 
+            unsafe_allow_html=True
+        )
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("🚀 GO TO MAPS", use_container_width=True, type="primary"):
@@ -411,4 +457,3 @@ else:
                         <p style="margin:0; font-size: 15px; color: #bdc3c7;">Optimization is active.</p>
                     </div>
                 """, unsafe_allow_html=True)
-              
