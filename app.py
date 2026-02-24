@@ -500,7 +500,7 @@ else:
                                                 <h2 style="margin:0; font-size: 30px;">
                                                         Water Stress Score 
                                                         <span class="wss-tooltip-container">
-                                                                <span class="wss-tooltip-icon">i</span>
+                                                                <span class="wss-tooltip-icon">?</span>
                                                                 <span class="wss-tooltip-box">
                                                                     <b>What is Water Stress Score (WSS)?</b><br><br>
                                                                     The WSS is a real‑time indicator measuring evaporation intensity and water demand.<br><br>
