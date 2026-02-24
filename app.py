@@ -611,7 +611,7 @@ else:
                 """, unsafe_allow_html=True)
 
             st.markdown("---")
-            st.markdown('<h2 style="font-size:32px;">🛠️ How to Recover this Water</h2>', unsafe_allow_html=True)
+            st.markdown('<h2 style="font-size:32px;">How to Recover this Water</h2>', unsafe_allow_html=True)
             
             
             
