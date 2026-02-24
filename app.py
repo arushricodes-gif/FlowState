@@ -109,16 +109,34 @@ if st.session_state.page == "home":
             margin-top: -20px;
             margin-bottom: -40px; /* Pulls the title up closer to the logo */
         }
+        /* Keyframes for the fade-in effect */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: -20px;
+            margin-bottom: -40px;
+            /* Apply the animation here */
+            animation: fadeIn 2.5s ease-out;
+        }
         
         .logo-wrapper img {
-            width: 300px; /* Controls the size of your logo */
+            width: 300px;
             height: auto;
         }
 
         .flowstate-title {
             margin-top: 0px !important;
             padding-top: 0px !important;
+            /* Optional: Add a slight delay so title fades in after logo */
+            animation: fadeIn 1.5s ease-out;
         }
+       
         </style>
     """, unsafe_allow_html=True)
 
@@ -176,7 +194,7 @@ if st.session_state.page == "home":
             }
             </style>
             <h1 class="flowstate-title">FLOW STATE</h1>
-            <p class="flowstate-subtitle">Guided by light • Sustained by water</p>
+            <p class="flowstate-subtitle">Guided by light • Rooted by water</p>
             """, 
             unsafe_allow_html=True
         )
@@ -270,7 +288,7 @@ else:
             }
             </style>
             <h1 class="flowstate-title">FLOW<br>STATE</h1>
-            <p class="flowstate-subtitle">Guided by light • Sustained by water</p>
+            <p class="flowstate-subtitle">Guided by light • Rooted by water</p>
             """, 
             unsafe_allow_html=True
         )
