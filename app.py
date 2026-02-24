@@ -407,169 +407,230 @@ else:
 
 
     with tab_waterfeatures:
-                wfeature_choice = st.selectbox("Analysis Tool", ["Water Stress Score (WSS)"])
-                if wfeature_choice == "Water Stress Score (WSS)":
-                        st.markdown(f"""
-                                <div style="text-align: center;">
-                                        <h1 style="color: #3498db; font-family: 'Poppins', sans-serif;">Water Stress Intelligence</h1>
-                                </div>
-                        """, unsafe_allow_html=True)
-                        st.markdown('<div style="height: 50px;"></div>', unsafe_allow_html=True)
+        wfeature_choice = st.selectbox("Analysis Tool", ["Water Stress Score (WSS)", "AC Condesate Estimator"])
+        
+        # Pull environment data once for both tools
+        env = st.session_state.env_data
+        u_lat, u_lon = st.session_state.coords[0], st.session_state.coords[1]
 
-                        u_lat, u_lon = st.session_state.coords[0], st.session_state.coords[1]
-                        env = st.session_state.env_data
-                        
-                        m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(
-                                city_info, sim_time, radius_meters, u_lat, u_lon
-                        )
-                        current_ghi = solarlogic.calculate_solar_radiation(m_el)
-                        
-                        wss_val, breakdown = solarlogic.calculate_wss_breakdown(current_ghi, env.get('temp', 25), env.get('hum', 50))
-                        res = solarlogic.classify_wss(wss_val) 
+        if wfeature_choice == "Water Stress Score (WSS)":
+            st.markdown(f"""
+                <div style="text-align: center;">
+                    <h1 style="color: #3498db; font-family: 'Poppins', sans-serif;">Water Stress Intelligence</h1>
+                </div>
+            """, unsafe_allow_html=True)
+            st.markdown('<div style="height: 50px;"></div>', unsafe_allow_html=True)
 
-                        col_input, col_viz, col_impact = st.columns([1, 2, 1])
+            m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(
+                city_info, sim_time, radius_meters, u_lat, u_lon
+            )
+            current_ghi = solarlogic.calculate_solar_radiation(m_el)
+            
+            wss_val, breakdown = solarlogic.calculate_wss_breakdown(current_ghi, env.get('temp', 25), env.get('hum', 50))
+            res = solarlogic.classify_wss(wss_val) 
 
-                        with col_input:
-                                st.subheader("Location & Conditions")
-                                st.info(f"📍 {u_lat:.4f}, {u_lon:.4f}")
-                                st.write(f"**Time:** {sim_time.strftime('%H:%M')}")
-                                st.metric("Temperature", f"{env.get('temp')}°C")
-                                st.metric("Humidity", f"{env.get('hum')}%")
-                                st.metric("Solar Radiation", f"{current_ghi} W/m²")
+            col_input, col_viz, col_impact = st.columns([1, 2, 1])
 
-                        with col_viz:
-                                st.markdown("""
-                                        <style>
-                                        .wss-tooltip-container {
-                                                position: relative;
-                                                display: inline-block;
-                                                vertical-align: middle;
-                                        }
-                                        .wss-tooltip-icon {
-                                                cursor: help;
-                                                font-size: 16px;
-                                                margin-left: 6px;
-                                                color: #95a5a6;
-                                                border-radius: 50%;
-                                                border: 1px solid #95a5a6;
-                                                padding: 2px 6px;
-                                                display: inline-block;
-                                        }
-                                        .wss-tooltip-box {
-                                                visibility: hidden;
-                                                opacity: 0;
-                                                position: absolute;
-                                                /* Positioning to the right of the icon */
-                                                left: 125%; 
-                                                top: 50%;
-                                                transform: translateY(-50%);
-                                                
-                                                background: #1e272e;
-                                                color: #ffffff;
-                                                padding: 15px;
-                                                border-radius: 8px;
-                                                font-size: 14px;
-                                                width: 320px;
-                                                white-space: normal;
-                                                z-index: 1000;
-                                                transition: opacity 0.2s ease;
-                                                text-align: left;
-                                                box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-                                                border: 1px solid #F39C12;
-                                        }
-                                        /* Arrow pointing to the left (towards the icon) */
-                                        .wss-tooltip-box::after {
-                                                content: "";
-                                                position: absolute;
-                                                top: 50%;
-                                                right: 100%;
-                                                transform: translateY(-50%);
-                                                border-width: 8px;
-                                                border-style: solid;
-                                                border-color: transparent #1e272e transparent transparent;
-                                        }
-                                        .wss-tooltip-container:hover .wss-tooltip-box {
-                                                visibility: visible;
-                                                opacity: 1;
-                                        }
-                                        </style>
-                                """, unsafe_allow_html=True)
+            with col_input:
+                st.subheader("Location & Conditions")
+                st.info(f"📍 {u_lat:.4f}, {u_lon:.4f}")
+                st.write(f"**Time:** {sim_time.strftime('%H:%M')}")
+                st.metric("Temperature", f"{env.get('temp')}°C")
+                st.metric("Humidity", f"{env.get('hum')}%")
+                st.metric("Solar Radiation", f"{current_ghi} W/m²")
 
-                                st.markdown(f"""
-                                        <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border-bottom: 5px solid {res['color']};">
-                                                <h2 style="margin:0; font-size: 30px;">
-                                                        Water Stress Score 
-                                                        <span class="wss-tooltip-container">
-                                                                <span class="wss-tooltip-icon">?</span>
-                                                                <span class="wss-tooltip-box">
-                                                                    <b>What is Water Stress Score (WSS)?</b><br><br>
-                                                                    The WSS is a real‑time indicator measuring evaporation intensity and water demand.<br><br>
-                                                                    <b>It includes:</b><br>1. Solar Radiation<br>2. Temperature<br>3. Humidity<br>4. Evapotranspiration.<br><br>
-                                                                    🟢 <b>Low (0–50):</b> Normal conditions<br>
-                                                                    🟡 <b>Moderate (50–75):</b> Increased water loss risk<br>
-                                                                    🔴 <b>High (75–100):</b> Extreme evaporation; conservation recommended.
-                                                                </span>
-                                                        </span>
-                                                        <br> {wss_val} / 100
-                                                </h2>
-                                                <div style="background: {res['color']}; color: white; padding: 5px 20px; border-radius: 5px; display: inline-block; margin-top: 10px; font-weight: bold;">
-                                                        ⚠️ {res['status'].upper()}
-                                                </div>
-                                        </div>
-                                """, unsafe_allow_html=True)
+            with col_viz:
+                st.markdown("""
+                    <style>
+                    .wss-tooltip-container { position: relative; display: inline-block; vertical-align: middle; }
+                    .wss-tooltip-icon { cursor: help; font-size: 16px; margin-left: 6px; color: #95a5a6; border-radius: 50%; border: 1px solid #95a5a6; padding: 2px 6px; display: inline-block; }
+                    .wss-tooltip-box { visibility: hidden; opacity: 0; position: absolute; left: 125%; top: 50%; transform: translateY(-50%); background: #1e272e; color: #ffffff; padding: 15px; border-radius: 8px; font-size: 14px; width: 320px; white-space: normal; z-index: 1000; transition: opacity 0.2s ease; text-align: left; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border: 1px solid #F39C12; }
+                    .wss-tooltip-box::after { content: ""; position: absolute; top: 50%; right: 100%; transform: translateY(-50%); border-width: 8px; border-style: solid; border-color: transparent #1e272e transparent transparent; }
+                    .wss-tooltip-container:hover .wss-tooltip-box { visibility: visible; opacity: 1; }
+                    </style>
+                """, unsafe_allow_html=True)
 
-                                st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
-                                
-                                st.write("#### Factors Contributing to Water Stress")
-                                
-                                fig_bar = go.Figure(data=[
-                                        go.Bar(
-                                                x=['Solar', 'Temperature', 'Evapotranspiration', 'Humidity'],
-                                                y=breakdown,
-                                                marker_color=['#f1c40f', '#e67e22', '#3498db', '#2ecc71'],
-                                                text=[f"{x:.1f}%" for x in breakdown],
-                                                textposition='auto',
-                                        )
-                                ])
-                                fig_bar.update_layout(height=250, margin=dict(l=0, r=0, t=10, b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-                                st.plotly_chart(fig_bar, use_container_width=True)
+                st.markdown(f"""
+                    <div style="text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; border-bottom: 5px solid {res['color']};">
+                        <h2 style="margin:0; font-size: 30px;">
+                            Water Stress Score 
+                            <span class="wss-tooltip-container">
+                                <span class="wss-tooltip-icon">?</span>
+                                <span class="wss-tooltip-box">
+                                    <b>What is Water Stress Score (WSS)?</b><br><br>
+                                    The WSS is a real‑time indicator measuring evaporation intensity and water demand.<br><br>
+                                    <b>It includes:</b><br>1. Solar Radiation<br>2. Temperature<br>3. Humidity<br>4. Evapotranspiration.<br><br>
+                                    🟢 <b>Low (0–50):</b> Normal conditions<br>
+                                    🟡 <b>Moderate (50–75):</b> Increased water loss risk<br>
+                                    🔴 <b>High (75–100):</b> Extreme evaporation; conservation recommended.
+                                </span>
+                            </span>
+                            <br> {wss_val} / 100
+                        </h2>
+                        <div style="background: {res['color']}; color: white; padding: 5px 20px; border-radius: 5px; display: inline-block; margin-top: 10px; font-weight: bold;">
+                            ⚠️ {res['status'].upper()}
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
 
-                                st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
-                                st.write("#### Water Stress Score Forecast")
-                                hours = ['12 AM', '4 AM', '8 AM', '12 PM', '4 PM', '8 PM']
-                                scores = [wss_val*0.6, wss_val*0.5, wss_val*0.8, wss_val*1.1, wss_val, wss_val*0.7]
-                                fig_line = go.Figure(data=go.Scatter(x=hours, y=scores, fill='tozeroy', line_color=res['color']))
-                                fig_line.update_layout(height=200, margin=dict(l=0, r=0, t=10, b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-                                st.plotly_chart(fig_line, use_container_width=True)
+                st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
+                st.write("#### Factors Contributing to Water Stress")
+                fig_bar = go.Figure(data=[go.Bar(x=['Solar', 'Temperature', 'Evapotranspiration', 'Humidity'], y=breakdown, marker_color=['#f1c40f', '#e67e22', '#3498db', '#2ecc71'], text=[f"{x:.1f}%" for x in breakdown], textposition='auto')])
+                fig_bar.update_layout(height=250, margin=dict(l=0, r=0, t=10, b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+                st.plotly_chart(fig_bar, use_container_width=True)
 
-                        with col_impact:
-                                st.subheader(f"{res['status']} Mode Measures")
-                                status_color = "#2ecc71" if res["status"] == "Low" else "#f1c40f" if res["status"] == "Moderate" else "#e74c3c"
-                                bg_color = "rgba(46, 204, 113, 0.1)" if res["status"] == "Low" else "rgba(241, 196, 15, 0.1)" if res["status"] == "Extreme" else "rgba(231, 76, 60, 0.1)"
+                st.markdown('<div style="height: 40px;"></div>', unsafe_allow_html=True)
+                st.write("#### Water Stress Score Forecast")
+                hours = ['12 AM', '4 AM', '8 AM', '12 PM', '4 PM', '8 PM']
+                scores = [wss_val*0.6, wss_val*0.5, wss_val*0.8, wss_val*1.1, wss_val, wss_val*0.7]
+                fig_line = go.Figure(data=go.Scatter(x=hours, y=scores, fill='tozeroy', line_color=res['color']))
+                fig_line.update_layout(height=200, margin=dict(l=0, r=0, t=10, b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+                st.plotly_chart(fig_line, use_container_width=True)
 
-                                measures_html = "".join([f"<div style='margin-bottom: 12px;'>✅ {action}</div>" for action in res["actions"]])
+            with col_impact:
+                st.subheader(f"{res['status']} Mode Measures")
+                status_color = "#2ecc71" if res["status"] == "Low" else "#f1c40f" if res["status"] == "Moderate" else "#e74c3c"
+                bg_color = "rgba(46, 204, 113, 0.1)" if res["status"] == "Low" else "rgba(241, 196, 15, 0.1)" if res["status"] == "Extreme" else "rgba(231, 76, 60, 0.1)"
+                measures_html = "".join([f"<div style='margin-bottom: 12px;'>✅ {action}</div>" for action in res["actions"]])
 
-                                st.markdown(f"""
-                                        <div style="
-                                                background-color: {bg_color}; 
-                                                border-radius: 10px; 
-                                                padding: 20px; 
-                                                border: 1px solid {status_color};
-                                                color: white;
-                                                font-size: 20px; 
-                                                line-height: 1.6;
-                                                font-family: 'Poppins', sans-serif;
-                                        ">
-                                                {measures_html}
-                                        </div>
-                                """, unsafe_allow_html=True)
+                st.markdown(f'<div style="background-color: {bg_color}; border-radius: 10px; padding: 20px; border: 1px solid {status_color}; color: white; font-size: 20px; line-height: 1.6; font-family: \'Poppins\', sans-serif;">{measures_html}</div>', unsafe_allow_html=True)
+                st.markdown("---")
+                st.markdown("### 📊 Estimated Impact")
+                st.markdown(f"""
+                    <div style="font-size: 20px; line-height: 2.2;">
+                        💧 <b>Estimated Water Saved:</b> <span style="color: #3498db;">{res['savings']['water']}</span><br>
+                        💰 <b>Monthly Cost Savings:</b> <span style="color: #2ecc71;">{res['savings']['cost']}</span><br>
+                        📈 <b>Evaporation Reduction:</b> <span style="color: #f39c12;">{res['savings']['evap']}</span>
+                    </div>
+                """, unsafe_allow_html=True)
 
-                                st.markdown("---")
-                                st.markdown("### 📊 Estimated Impact")
-                                st.markdown(f"""
-                                        <div style="font-size: 20px; line-height: 2.2;">
-                                                💧 <b>Estimated Water Saved:</b> <span style="color: #3498db;">{res['savings']['water']}</span><br>
-                                                💰 <b>Monthly Cost Savings:</b> <span style="color: #2ecc71;">{res['savings']['cost']}</span><br>
-                                                📈 <b>Evaporation Reduction:</b> <span style="color: #f39c12;">{res['savings']['evap']}</span>
-                                        </div>
-                                """, unsafe_allow_html=True)
+        if wfeature_choice == "AC Condesate Estimator":
+            # Tooltip CSS and Flexbox Centered Header
+            st.markdown("""
+                <style>
+                .ac-header-flex {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 15px;
+                    margin-bottom: 30px;
+                }
+                .ac-title {
+                    color: #3498db; 
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 48px; /* Extra large header */
+                    margin: 0;
+                }
+                .ac-tooltip-container { position: relative; display: inline-block; }
+                .ac-tooltip-icon { 
+                    cursor: help; font-size: 24px; color: #95a5a6; 
+                    border-radius: 50%; border: 1px solid #95a5a6; padding: 2px 10px; 
+                    display: inline-block; font-weight: bold;
+                }
+                .ac-tooltip-box { 
+                    visibility: hidden; opacity: 0; position: absolute; left: 125%; top: 50%; 
+                    transform: translateY(-50%); background: #1e272e; color: #ffffff; 
+                    padding: 20px; border-radius: 8px; font-size: 16px; width: 350px; 
+                    white-space: normal; z-index: 1000; transition: opacity 0.2s ease; 
+                    text-align: left; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border: 1px solid #3498db; 
+                }
+                .ac-tooltip-box::after { 
+                    content: ""; position: absolute; top: 50%; right: 100%; 
+                    transform: translateY(-50%); border-width: 10px; border-style: solid; 
+                    border-color: transparent #1e272e transparent transparent; 
+                }
+                .ac-tooltip-container:hover .ac-tooltip-box { visibility: visible; opacity: 1; }
+                
+                /* Making standard text blocks bigger */
+                .big-text { font-size: 20px !important; line-height: 1.6; }
+                .config-label { font-size: 24px !important; font-weight: bold; color: #f8f9fa; }
+                </style>
+                
+                <div class="ac-header-flex">
+                    <h1 class="ac-title">AC Condensate Intelligence</h1>
+                    <span class="ac-tooltip-container">
+                        <span class="ac-tooltip-icon">?</span>
+                        <span class="ac-tooltip-box">
+                            <b>About the AC Estimator</b><br><br>
+                            This tool calculates the volume of water (condensate) created by your AC's dehumidification process.<br><br>
+                            <b>How it works:</b> It uses your AC tonnage and runtime, cross-referenced with real-time local humidity, to estimate the liters of distilled-quality water you can harvest from your drain pipe.
+                        </span>
+                    </span>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            col_ac_input, col_ac_viz = st.columns([1, 2])
+            
+            with col_ac_input:
+                st.markdown('<p class="config-label">System Configuration</p>', unsafe_allow_html=True)
+                st.markdown('<p class="big-text">Set your AC details below:</p>', unsafe_allow_html=True)
+                
+                ac_tonnage = st.number_input("AC Capacity (Tons)", min_value=0.5, max_value=10.0, value=1.5, step=0.5)
+                run_hours = st.slider("Daily Run Time (Hours)", 1, 24, 12)
+                
+                if st.checkbox("Calculate tonnage by room size"):
+                    sqft = st.number_input("Room Size (sq ft)", value=250)
+                    ac_tonnage = round(sqft / 175, 1)
+                    st.markdown(f'<p style="font-size:18px; color:#3498db;">Estimated Tonnage: <b>{ac_tonnage} Tons</b></p>', unsafe_allow_html=True)
+
+            # Logic Calculation
+            humidity = env.get('hum', 50)
+            coef = 0.9 if humidity > 70 else 0.7 if humidity > 40 else 0.4
+            daily_yield = ac_tonnage * run_hours * coef
+            monthly_yield = daily_yield * 30
+
+            # Dynamic Styling based on Wastage
+            is_high_waste = daily_yield > 15
+            waste_color = "#E74C3C" if is_high_waste else "#3498DB"
+            waste_label = "🔴 High Volume Wastage" if is_high_waste else "🟢 Moderate Recovery"
+
+            with col_ac_viz:
+                st.markdown(f'<p class="config-label" style="color:{waste_color};">Current Recovery Potential</p>', unsafe_allow_html=True)
+                st.metric(
+                    label="Daily Yield", 
+                    value=f"{daily_yield:.1f} Liters", 
+                    delta=waste_label,
+                    delta_color="normal" if is_high_waste else "off"
+                )
+                
+                st.markdown(f'<p class="big-text"><b>Efficiency Gauge:</b></p>', unsafe_allow_html=True)
+                st.progress(min(daily_yield / 30, 1.0))
+
+                st.markdown(f"""
+                <div style="background-color: {waste_color}22; border: 2px solid {waste_color}; padding: 25px; border-radius: 15px; margin-top: 20px;">
+                    <h2 style="margin-top:0; color: {waste_color}; font-family: 'Poppins', sans-serif;">Monthly Potential: {monthly_yield:.0f} Liters</h2>
+                    <div class="big-text">
+                        <p style="margin-bottom:10px;"><b>Actionable Uses:</b></p>
+                        <ul style="margin-top:0;">
+                            <li>🪴 <b>Irrigation:</b> Enough for ~{int(daily_yield/2)} large planters.</li>
+                            <li>🧹 <b>Cleaning:</b> Equivalent to {int(daily_yield/5)} full buckets.</li>
+                            <li>💨 <b>Appliances:</b> Pure distilled quality (zero lime-scale).</li>
+                        </ul>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("---")
+            st.markdown('<h2 style="font-size:32px;">🛠️ How to Recover this Water</h2>', unsafe_allow_html=True)
+            
+            
+            
+            r_col1, r_col2 = st.columns(2)
+            with r_col1:
+                st.markdown(f"""
+                <div class="big-text">
+                <b>1. The Simple Setup (Gravity Feed)</b><br>
+                Most UAE apartments have a drainage pipe on the balcony. Simply reroute this pipe into a 20L BPA-free bucket.<br><br>
+                <b>2. Filtration Tip</b><br>
+                While the water is distilled-quality, it can pick up dust from the coils. Use a simple mesh filter to keep it debris-free.
+                </div>
+                """, unsafe_allow_html=True)
+            with r_col2:
+                st.markdown(f"""
+                <div class="big-text">
+                <b>3. Storage & Safety</b><br>
+                Keep your collection tank covered to prevent mosquito breeding. Use the water within 48 hours for the best results.<br><br>
+                <b>4. Maintenance</b><br>
+                Check the collection bucket once a day to prevent overflows during high-humidity months.
+                </div>
+                """, unsafe_allow_html=True)
