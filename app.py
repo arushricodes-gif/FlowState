@@ -92,118 +92,101 @@ def get_base64_image(path):
 
 # --- PAGE ROUTING ---
 if st.session_state.page == "home":
-    # 1. Global CSS to remove Streamlit top padding and control logo/text spacing
-    st.markdown("""
-        <style>
-        /* This removes the massive gap at the very top of the window */
-        .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 0rem !important;
-        }
-        
-        /* Centering the logo and removing vertical margins */
-        .logo-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: -20px;
-            margin-bottom: -40px; /* Pulls the title up closer to the logo */
-        }
-        /* Keyframes for the fade-in effect */
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
+    # 1. Encode Images
+    bg_img = get_base64_image("bg.png")
+    logo_img = get_base64_image("flowstate_logo.png")
 
-        .logo-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: -20px;
-            margin-bottom: -40px;
-            /* Apply the animation here */
-            animation: fadeIn 2.5s ease-out;
-        }
-        
-        .logo-wrapper img {
-            width: 300px;
-            height: auto;
-        }
+    # 2. CSS for Hero Section, Animations, and Ripple Button
+    st.markdown(f"""
+    <style>
+    /* Edge-to-edge Hero Container */
+    .hero-section {{
+        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), 
+                    url("data:image/jpg;base64,{bg_img}");
+        background-size: cover;
+        background-position: center;
+        height: 100vh;
+        width: 100vw;
+        margin-left: calc(-50vw + 50%);
+        margin-top: -100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        justify-content: center; 
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }}
 
-        .flowstate-title {
-            margin-top: 0px !important;
-            padding-top: 0px !important;
-            /* Optional: Add a slight delay so title fades in after logo */
-            animation: fadeIn 1.5s ease-out;
-        }
-       
-        </style>
-    """, unsafe_allow_html=True)
+    @keyframes letterSpacingMove {{
+        0% {{ letter-spacing: 5px; opacity: 0; filter: blur(10px); }}
+        100% {{ letter-spacing: 15px; opacity: 1; filter: blur(0px); }}
+    }}
 
-    # 2. Render Logo using the helper function
-    try:
-        encoded_logo = get_base64_image("flowstate_logo.png")
-        st.markdown(
-            f'<div class="logo-wrapper"><img src="data:image/png;base64,{encoded_logo}"></div>', 
-            unsafe_allow_html=True
-        )
-    except FileNotFoundError:
-        st.error("Logo file not found. Ensure 'flowstate_logo.png' is in your project folder.")
-    st.markdown(
-            """
-            <style>
-            @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-            
-            /* Load Akira for headers */
-            @font-face {
-                font-family: 'Akira';
-                src: url('https://fonts.cdnfonts.com/s/62983/Akira Expanded Demo.woff');
-            }
+    /* FIXED: Added double braces for f-string compatibility */
+    .hero-logo {{
+        width: 380px; 
+        display: block; 
+        margin-left: auto;
+        margin-right: auto;
+        filter: drop-shadow(0px 0px 30px rgba(243, 156, 18, 0.5));
+        animation: fadeIn 1.5s ease-out;
+        margin-bottom: -85px; 
+    }}
+    
+    .hero-title {{
+        font-family: 'Akira', sans-serif;
+        font-size: 85px;
+        color: #F39C12;
+        text-transform: uppercase;
+        margin: 0; 
+        padding: 0;
+        line-height: 1;
+        animation: letterSpacingMove 2.5s ease-out forwards;
+        background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: block;
+        width: 100%;
+    }}
 
-            /* Global font override for readability */
-            html, body, [class*="st-at"], [class*="st-ae"] {
-                font-family: 'Poppins', sans-serif !important;
-            }
+    .hero-subtitle {{
+        font-family: 'Poppins', sans-serif;
+        color: white;
+        font-size: 1.1rem;
+        letter-spacing: 5px;
+        text-transform: uppercase;
+        margin-top: 5px; 
+        margin-bottom: 50px;
+        opacity: 0;
+        animation: fadeIn 1.5s ease-out 2s forwards;
+        display: block;
+        width: 100%;
+    }}
+    </style>
 
-            .flowstate-title {
-                font-family: 'Akira', sans-serif;
-                font-size: 80px;
-                font-weight: 900;
-                color: #F39C12;
-                text-align: center;
-                text-transform: uppercase;
-                letter-spacing: 15px;
-                line-height: 1.1;
-                margin-bottom: 10px;
-                background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                filter: drop-shadow(0px 0px 20px rgba(243, 156, 18, 0.4));
-            }
+    <div class="hero-section">
+        <img src="data:image/png;base64,{logo_img}" class="hero-logo">
+        <h1 class="hero-title">FLOWSTATE</h1>
+        <p class="hero-subtitle">Guided by Light • Rooted in Water</p>
+    </div>
+""", unsafe_allow_html=True)
 
-            .flowstate-subtitle {
-                font-family: 'Poppins', sans-serif;
-                color: #F39C12;
-                text-align: center;
-                font-size: 1.2rem;
-                font-weight: 300;
-                letter-spacing: 4px;
-                text-transform: uppercase;
-                margin-top: -20px;
-                margin-bottom: 40px;
-            }
-            </style>
-            <h1 class="flowstate-title">FLOW STATE</h1>
-            <p class="flowstate-subtitle">Guided by light • Rooted by water</p>
-            """, 
-            unsafe_allow_html=True
-        )
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        if st.button("GO TO MAPS", use_container_width=True, type="primary"):
+
+    # 3. Interactive Button (Positioned over the Hero)
+    c1, c2, c3 = st.columns([1.5, 1, 1.5])
+    with c2:
+        st.markdown('<div style="margin-top: -220px; position: relative; z-index: 1000;">', unsafe_allow_html=True)
+        if st.button("GET INVOLVED", use_container_width=True):
             st.session_state.page = "app"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
+    # 4. CONTENT BELOW THE FOLD
+    st.markdown('<div style="height: 120px;"></div>', unsafe_allow_html=True)
+    
+
+   
     
     st.markdown("""
     <div style="color: white; font-family: 'Inter', sans-serif;">
