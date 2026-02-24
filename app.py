@@ -253,7 +253,7 @@ else:
         rise_t = sim_time.replace(hour=6, minute=0); set_t = sim_time.replace(hour=18, minute=0); noon_t = sim_time.replace(hour=12, minute=0)
 
     # --- TABS START HERE ---
-    tab_location, tab_sunfeatures, tab_waterfeatures = st.tabs(["📍 Location Setup", "Sun Features", "Water Features"])
+    tab_location, tab_sunfeatures, tab_waterfeatures = st.tabs(["Location Setup", "Sun Features", "Water Features"])
         
     with tab_location:
         display_lat = f"{st.session_state.coords[0]:.5f}"
@@ -440,7 +440,7 @@ else:
                                                                 <span class="wss-tooltip-box">
                                                                     <b>What is Water Stress Score (WSS)?</b><br><br>
                                                                     The WSS is a real‑time indicator measuring evaporation intensity and water demand.<br><br>
-                                                                    <b>Components:</b> Solar Radiation, Temperature, Humidity, and Evapotranspiration.<br><br>
+                                                                    <b>It includes:</b><br>1. Solar Radiation<br>2. Temperature<br>3. Humidity<br>4. Evapotranspiration.<br><br>
                                                                     🟢 <b>Low (0–50):</b> Normal conditions<br>
                                                                     🟡 <b>Moderate (50–75):</b> Increased water loss risk<br>
                                                                     🔴 <b>High (75–100):</b> Extreme evaporation; conservation recommended.
