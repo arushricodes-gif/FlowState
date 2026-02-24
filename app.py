@@ -177,7 +177,7 @@ if st.session_state.page == "home":
     c1, c2, c3 = st.columns([1.5, 1, 1.5])
     with c2:
         st.markdown('<div style="margin-top: -220px; position: relative; z-index: 1000;">', unsafe_allow_html=True)
-        if st.button("GET INVOLVED", use_container_width=True):
+        if st.button("Go to Maps", use_container_width=True):
             st.session_state.page = "app"
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
