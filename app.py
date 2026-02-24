@@ -135,7 +135,7 @@ if st.session_state.page == "home":
         )
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("🚀 GO TO MAPS", use_container_width=True, type="primary"):
+        if st.button("GO TO MAPS", use_container_width=True, type="primary"):
             st.session_state.page = "app"
             st.rerun()
 
