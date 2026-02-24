@@ -610,10 +610,53 @@ else:
                 </div>
                 """, unsafe_allow_html=True)
 
+            # --- THERMAL STORAGE & CARBON IMPACT SECTION ---
+            st.markdown("---")
+            
+            # Create two columns for the new features
+            col_thermal, col_carbon = st.columns(2)
+
+            with col_thermal:
+                st.markdown(f"""
+                <div style="background-color: #0e1621; border: 1px solid #00d4ff; padding: 25px; border-radius: 15px; height: 100%;">
+                    <h3 style="color: #00d4ff; font-family: 'Poppins', sans-serif; margin-top:0;">🧊 Thermal Storage Strategy</h3>
+                    <p style="font-size:18px; color: #f8f9fa;">
+                        Your AC water exits at <b>12°C – 15°C</b>. This is "Free Coldness."
+                    </p>
+                    <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #00d4ff;">
+                        <p style="margin:0; font-size:16px;">
+                            <b>The Strategy:</b> Store this water in an <b>insulated tank</b>. 
+                            At 2:00 PM (Peak Heat), use it to mist your balcony or flush the floor. 
+                            This lowers your "Micro-Climate" temperature, reducing AC load by up to <b>8%</b>.
+                        </p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with col_carbon:
+                # CO2 Math: 0.4g per liter is a standard for UAE desalination impact
+                total_co2_saved = monthly_yield * 0.4 
+                # Driving math: Average car emits ~120g CO2 per km
+                km_equivalent = total_co2_saved / 120
+
+                st.markdown(f"""
+                <div style="background-color: #0e1621; border: 1px solid #2ecc71; padding: 25px; border-radius: 15px; height: 100%;">
+                    <h3 style="color: #2ecc71; font-family: 'Poppins', sans-serif; margin-top:0;">🌿 The Green Badge</h3>
+                    <p style="font-size:18px; color: #f8f9fa;">
+                        Desalinating water in the UAE is energy-intensive. 
+                    </p>
+                    <div style="text-align:center; padding: 10px;">
+                        <span style="font-size:40px;">🛡️</span>
+                        <h4 style="margin:10px 0; color:#2ecc71;">Monthly CO2 Offset: {total_co2_saved:.1f}g</h4>
+                        <p style="font-size:16px; opacity:0.8;">
+                            Equivalent to avoiding <b>{km_equivalent:.2f} km</b> of driving in a petrol car.
+                        </p>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
             st.markdown("---")
             st.markdown('<h2 style="font-size:32px;">How to Recover this Water</h2>', unsafe_allow_html=True)
-            
-            
             
             r_col1, r_col2 = st.columns(2)
             with r_col1:
