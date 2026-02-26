@@ -217,7 +217,6 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
             L.circle([{lat}, {lon}], {{ radius: {radius}, color: 'black', weight: 3, fillOpacity: 0.05 }}).addTo(map_s);
             L.circleMarker([{lat}, {lon}], {{radius: 5, color: 'white', fillColor: '#F39C12', fillOpacity: 1}}).addTo(map_s);
             
-            // Labels with updated coordinates
             L.marker({set_coords}, {{ opacity: 0 }}).addTo(map_s)
                 .bindTooltip("SUNSET", {{ permanent: true, direction: 'center', className: 'loc-label sunset-vibrant' }});
                 
@@ -243,21 +242,20 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
                 border: none !important;
                 box-shadow: none !important;
                 font-family: 'Inter', sans-serif !important;
-                font-weight: 900 !important;
-                font-size: 38px !important;
-                letter-spacing: 3px !important;
+                font-weight: 800 !important;
+                font-size: 16px !important; 
+                letter-spacing: 1.5px !important;
                 pointer-events: none !important;
             }}
-            /* High-Intensity Colors and Heavy Shadows */
             .sunrise-vibrant {{ 
                 color: #FF0000 !important; 
-                text-shadow: 0 0 20px rgba(255,0,0,0.4), 2px 2px 5px #000 !important; 
+                text-shadow: 1px 1px 15px #000 !important; 
             }}
             .sunset-vibrant {{ 
                 color: #0070FF !important; 
-                text-shadow: 0 0 20px rgba(0,112,255,0.4), 2px 2px 5px #000 !important; 
+                text-shadow: 1px 1px 15px #000 !important; 
             }}
         </style>
     """
-    st.components.v1.html(html_content, height=620)
-    
+    components.html(html_content, height=620)
+
