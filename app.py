@@ -101,79 +101,57 @@ if st.session_state.page == "home":
     # 2. CSS for Hero Section, Animations, and Ripple Button
     st.markdown(f"""
     <style>
-    /* Edge-to-edge Hero Container */
+    @keyframes togetherRise {{
+        0% {{ letter-spacing: 2px; opacity: 0; filter: blur(10px); transform: translateY(15px); }}
+        100% {{ letter-spacing: 12px; opacity: 1; filter: blur(0px); transform: translateY(0px); }}
+    }}
+    @keyframes logoFade {{
+        from {{ opacity: 0; transform: scale(0.95); }}
+        to {{ opacity: 1; transform: scale(1); }}
+    }}
     .hero-section {{
-        background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), 
-                    url("data:image/jpg;base64,{bg_img}");
-        background-size: cover;
-        background-position: center;
-        height: 100vh;
-        width: 100vw;
-        margin-left: calc(-50vw + 50%);
-        margin-top: -100px;
-        display: flex;
-        flex-direction: column;
-        align-items: center; 
-        justify-content: center; 
-        position: relative;
-        overflow: hidden;
-        text-align: center;
+        background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2)), url("data:image/jpg;base64,{bg_img}");
+        background-size: cover; background-position: center; height: 100vh; width: 100vw;
+        margin-left: calc(-50vw + 50%); margin-top: -100px; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; position: relative; text-align: center; overflow: hidden;
     }}
-
-    @keyframes letterSpacingMove {{
-        0% {{ letter-spacing: 5px; opacity: 0; filter: blur(10px); }}
-        100% {{ letter-spacing: 15px; opacity: 1; filter: blur(0px); }}
-    }}
-
-    /* FIXED: Added double braces for f-string compatibility */
-    .hero-logo {{
-        width: 380px; 
-        display: block; 
-        margin-left: auto;
-        margin-right: auto;
-        filter: drop-shadow(0px 0px 30px rgba(243, 156, 18, 0.5));
-        animation: fadeIn 1.5s ease-out;
-        margin-bottom: -85px; 
-    }}
-    
+    .hero-logo {{ width: 380px; filter: drop-shadow(0px 0px 30px rgba(243, 156, 18, 0.5)); animation: logoFade 0.8s ease-out forwards; margin-bottom: -85px; }}
     .hero-title {{
-        font-family: 'Akira', sans-serif;
-        font-size: 85px;
-        color: #F39C12;
-        text-transform: uppercase;
-        margin: 0; 
-        padding: 0;
-        line-height: 1;
-        animation: letterSpacingMove 2.5s ease-out forwards;
-        background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        display: block;
-        width: 100%;
+        font-family: 'Akira', sans-serif; font-size: 85px; color: #F39C12; text-transform: uppercase; margin: 0; line-height: 1;
+        background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        animation: togetherRise 0.8s ease-out 0.2s forwards; opacity: 0;
     }}
-
     .hero-subtitle {{
-        font-family: 'Poppins', sans-serif;
-        color: white;
-        font-size: 1.1rem;
-        letter-spacing: 5px;
-        text-transform: uppercase;
-        margin-top: 5px; 
-        margin-bottom: 50px;
+        font-family: 'Poppins', sans-serif; color: white; font-size: 1.1rem; text-transform: uppercase; margin-top: 15px; margin-bottom: 50px;
+        animation: togetherRise 0.8s ease-out 0.2s forwards; opacity: 0;
+    }}
+    [data-testid="stVerticalBlock"] > div:has(div.stButton) {{ display: flex !important; justify-content: center !important; width: 100% !important; }}
+    .stButton {{ margin-top: -160px !important; z-index: 999; }}
+    div.stButton > button {{
+        background-color: #F39C12 !important; 
+        color: white !important; 
+        border: 2px solid #F39C12 !important; 
+        border-radius: 50px !important;
+        padding: 0.6rem 2.5rem !important; /* Narrower padding */
+        font-weight: bold !important; 
+        text-transform: uppercase !important; 
+        letter-spacing: 2px !important;
+        animation: logoFade 0.6s ease-out 1s forwards; 
         opacity: 0;
-        animation: fadeIn 1.5s ease-out 2s forwards;
+        width: auto !important; /* Prevents full-width stretch */
         display: block;
-        width: 100%;
+        margin: 0 auto;
     }}
     </style>
-
     <div class="hero-section">
         <img src="data:image/png;base64,{logo_img}" class="hero-logo">
         <h1 class="hero-title">FLOWSTATE</h1>
         <p class="hero-subtitle">Guided by Light • Rooted in Water</p>
     </div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
+    
+   
 
     # 3. Interactive Button (Positioned over the Hero)
     c1, c2, c3 = st.columns([1.5, 1, 1.5])
