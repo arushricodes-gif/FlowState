@@ -13,12 +13,13 @@ import os
 import requests
 import pandas as pd
 import math
-
+import numpy as np
+from scipy.optimize import minimize
 import base64
-
-
 import visuals
 import solarlogic
+
+
 
 # --- INITIALIZATION ---
 st.set_page_config(layout="wide", page_title="Solar Path Visualizer", page_icon="☀️")
@@ -510,178 +511,183 @@ else:
 
 
         if wfeature_choice == "AC Condesate Estimator":
-            # Tooltip CSS and Flexbox Centered Header
-            st.markdown("""
+
+                # ---------------------------------------------------
+                # SCOPED UI STYLING (ONLY THIS SECTION)
+                # ---------------------------------------------------
+                st.markdown("""
                 <style>
-                .ac-header-flex {
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 15px;
-                    margin-bottom: 30px;
+                .ac-section h1 {
+                        font-size: 52px !important;
+                        font-weight: 600;
+                        margin-bottom: 10px;
                 }
-                .ac-title {
-                    color: #3498db; 
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 48px; /* Extra large header */
-                    margin: 0;
+                .ac-section h2 {
+                        font-size: 32px !important;
+                        font-weight: 600;
                 }
-                .ac-tooltip-container { position: relative; display: inline-block; }
-                .ac-tooltip-icon { 
-                    cursor: help; font-size: 24px; color: #95a5a6; 
-                    border-radius: 50%; border: 1px solid #95a5a6; padding: 2px 10px; 
-                    display: inline-block; font-weight: bold;
+                .ac-section p, 
+                .ac-section li {
+                        font-size: 22px !important;
+                        line-height: 1.6;
                 }
-                .ac-tooltip-box { 
-                    visibility: hidden; opacity: 0; position: absolute; left: 125%; top: 50%; 
-                    transform: translateY(-50%); background: #1e272e; color: #ffffff; 
-                    padding: 20px; border-radius: 8px; font-size: 16px; width: 350px; 
-                    white-space: normal; z-index: 1000; transition: opacity 0.2s ease; 
-                    text-align: left; box-shadow: 5px 5px 15px rgba(0,0,0,0.3); border: 1px solid #3498db; 
+                .ac-section .stMetric label {
+                        font-size: 22px !important;
                 }
-                .ac-tooltip-box::after { 
-                    content: ""; position: absolute; top: 50%; right: 100%; 
-                    transform: translateY(-50%); border-width: 10px; border-style: solid; 
-                    border-color: transparent #1e272e transparent transparent; 
+                .ac-section .stMetric div {
+                        font-size: 34px !important;
                 }
-                .ac-tooltip-container:hover .ac-tooltip-box { visibility: visible; opacity: 1; }
-                
-                /* Making standard text blocks bigger */
-                .big-text { font-size: 20px !important; line-height: 1.6; }
-                .config-label { font-size: 24px !important; font-weight: bold; color: #f8f9fa; }
+                .ac-section .explain-box {
+                        background: rgba(52, 152, 219, 0.08);
+                        padding: 20px;
+                        border-radius: 12px;
+                        margin-top: 15px;
+                        margin-bottom: 25px;
+                }
                 </style>
-                
-                <div class="ac-header-flex">
-                    <h1 class="ac-title">AC Condensate Intelligence</h1>
-                    <span class="ac-tooltip-container">
-                        <span class="ac-tooltip-icon">?</span>
-                        <span class="ac-tooltip-box">
-                            <b>About the AC Estimator</b><br><br>
-                            This tool calculates the volume of water (condensate) created by your AC's dehumidification process.<br><br>
-                            <b>How it works:</b> It uses your AC tonnage and runtime, cross-referenced with real-time local humidity, to estimate the liters of distilled-quality water you can harvest from your drain pipe.
-                        </span>
-                    </span>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            col_ac_input, col_ac_viz = st.columns([1, 2])
-            
-            with col_ac_input:
-                st.markdown('<p class="config-label">System Configuration</p>', unsafe_allow_html=True)
-                st.markdown('<p class="big-text">Set your AC details below:</p>', unsafe_allow_html=True)
-                
-                ac_tonnage = st.number_input("AC Capacity (Tons)", min_value=0.5, max_value=10.0, value=1.5, step=0.5)
-                run_hours = st.slider("Daily Run Time (Hours)", 1, 24, 12)
-                
-                if st.checkbox("Calculate tonnage by room size"):
-                    sqft = st.number_input("Room Size (sq ft)", value=250)
-                    ac_tonnage = round(sqft / 175, 1)
-                    st.markdown(f'<p style="font-size:18px; color:#3498db;">Estimated Tonnage: <b>{ac_tonnage} Tons</b></p>', unsafe_allow_html=True)
-
-            # Logic Calculation
-            humidity = env.get('hum', 50)
-            coef = 0.9 if humidity > 70 else 0.7 if humidity > 40 else 0.4
-            daily_yield = ac_tonnage * run_hours * coef
-            monthly_yield = daily_yield * 30
-
-            # Dynamic Styling based on Wastage
-            is_high_waste = daily_yield > 15
-            waste_color = "#E74C3C" if is_high_waste else "#3498DB"
-            waste_label = "🔴 High Volume Wastage" if is_high_waste else "🟢 Moderate Recovery"
-
-            with col_ac_viz:
-                st.markdown(f'<p class="config-label" style="color:{waste_color};">Current Recovery Potential</p>', unsafe_allow_html=True)
-                st.metric(
-                    label="Daily Yield", 
-                    value=f"{daily_yield:.1f} Liters", 
-                    delta=waste_label,
-                    delta_color="normal" if is_high_waste else "off"
-                )
-                
-                st.markdown(f'<p class="big-text"><b>Efficiency Gauge:</b></p>', unsafe_allow_html=True)
-                st.progress(min(daily_yield / 30, 1.0))
-
-                st.markdown(f"""
-                <div style="background-color: {waste_color}22; border: 2px solid {waste_color}; padding: 25px; border-radius: 15px; margin-top: 20px;">
-                    <h2 style="margin-top:0; color: {waste_color}; font-family: 'Poppins', sans-serif;">Monthly Potential: {monthly_yield:.0f} Liters</h2>
-                    <div class="big-text">
-                        <p style="margin-bottom:10px;"><b>Actionable Uses:</b></p>
-                        <ul style="margin-top:0;">
-                            <li>🪴 <b>Irrigation:</b> Enough for ~{int(daily_yield/2)} large planters.</li>
-                            <li>🧹 <b>Cleaning:</b> Equivalent to {int(daily_yield/5)} full buckets.</li>
-                            <li>💨 <b>Appliances:</b> Pure distilled quality (zero lime-scale).</li>
-                        </ul>
-                    </div>
-                </div>
                 """, unsafe_allow_html=True)
 
-            # --- THERMAL STORAGE & CARBON IMPACT SECTION ---
-            st.markdown("---")
-            
-            # Create two columns for the new features
-            col_thermal, col_carbon = st.columns(2)
+                # Wrap everything in a scoped div
+                st.markdown('<div class="ac-section">', unsafe_allow_html=True)
 
-            with col_thermal:
-                st.markdown(f"""
-                <div style="background-color: #0e1621; border: 1px solid #00d4ff; padding: 25px; border-radius: 15px; height: 100%;">
-                    <h3 style="color: #00d4ff; font-family: 'Poppins', sans-serif; margin-top:0;">🧊 Thermal Storage Strategy</h3>
-                    <p style="font-size:18px; color: #f8f9fa;">
-                        Your AC water exits at <b>12°C – 15°C</b>. This is "Free Coldness."
-                    </p>
-                    <div style="background: rgba(0, 212, 255, 0.1); padding: 15px; border-radius: 10px; border-left: 5px solid #00d4ff;">
-                        <p style="margin:0; font-size:16px;">
-                            <b>The Strategy:</b> Store this water in an <b>insulated tank</b>. 
-                            At 2:00 PM (Peak Heat), use it to mist your balcony or flush the floor. 
-                            This lowers your "Micro-Climate" temperature, reducing AC load by up to <b>8%</b>.
+                # ---------------------------------------------------
+                # HEADER
+                # ---------------------------------------------------
+                st.markdown("""
+                <h1 style="text-align:center;">
+                💧 AC Condensate Intelligence
+                </h1>
+                <p style="text-align:center; opacity:0.75;">
+                Your AC is already producing distilled water.
+                This tool estimates how much you can realistically recover.
+                This model estimates water production based on: AC cooling capacity (tons), Daily runtime (hours), Real-time humidity conditions.
+                It uses a climate-adjusted condensate rate calibrated for Gulf-region HVAC systems.
+                </div>
+                </p>
+                """, unsafe_allow_html=True)
+
+                # ---------------------------------------------------
+                # HOW THIS IS CALCULATED
+                # ---------------------------------------------------
+                
+
+                st.markdown("---")
+
+                col_input, col_output = st.columns([1, 1.2])
+
+                # ---------------------------------------------------
+                # INPUT SECTION
+                # ---------------------------------------------------
+                with col_input:
+
+                        st.subheader("⚙ System Configuration")
+
+                        ac_tonnage = st.number_input(
+                                "AC Capacity (Tons)",
+                                min_value=0.5,
+                                max_value=10.0,
+                                value=1.5,
+                                step=0.5
+                        )
+
+                        run_hours = st.slider(
+                                "Daily Runtime (Hours)",
+                                1, 24, 12
+                        )
+
+                        st.markdown("""
+                        <p class="info-text">
+                        1–2 Tons → Bedroom | 3–5 Tons → Apartment | 5+ Tons → Villa
                         </p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                        """, unsafe_allow_html=True)
 
-            with col_carbon:
-                # CO2 Math: 0.4g per liter is a standard for UAE desalination impact
-                total_co2_saved = monthly_yield * 0.4 
-                # Driving math: Average car emits ~120g CO2 per km
-                km_equivalent = total_co2_saved / 120
+                # ---------------------------------------------------
+                # PHYSICS-BASED CALCULATION
+                # ---------------------------------------------------
+                humidity = env.get('hum', 50)
+
+                base_rate = 1.1  # liters per ton per hour (UAE humid baseline)
+
+                humidity_factor = 0.5 + (humidity / 100)
+                humidity_factor = min(max(humidity_factor, 0.7), 1.5)
+
+                daily_yield = ac_tonnage * run_hours * base_rate * humidity_factor
+                monthly_yield = daily_yield * 30
+
+                # ---------------------------------------------------
+                # OUTPUT SECTION
+                # ---------------------------------------------------
+                with col_output:
+
+                        st.subheader("📊 Water Recovery Potential")
+
+                        m1, m2 = st.columns(2)
+
+                        with m1:
+                                st.metric(
+                                        "Daily Recovery",
+                                        f"{daily_yield:.1f} Liters"
+                                )
+
+                        with m2:
+                                st.metric(
+                                        "Projected Monthly",
+                                        f"{monthly_yield:.0f} Liters"
+                                )
+
+                        st.progress(min(daily_yield / 30, 1.0))
+
+                        st.markdown("---")
+
+                        st.markdown(f"""
+                        ### 🌿 Practical Uses (Per Day)
+
+                        🪴 Water **{int(daily_yield/2)} plants**  
+                        🧹 Fill **{int(daily_yield/5)} cleaning buckets**  
+                        🥤 Equivalent to **{int(daily_yield)} liters of distilled-quality water**
+                        """)
+
+                # ---------------------------------------------------
+                # ENVIRONMENTAL IMPACT
+                # ---------------------------------------------------
+                st.markdown("---")
+                st.subheader("🌍 Environmental Impact")
+
+                co2_saved_kg = (monthly_yield * 0.4) / 1000
+                km_equivalent = (co2_saved_kg * 1000) / 120
+
+                c1, c2 = st.columns(2)
+
+                with c1:
+                        st.markdown(f"""
+                        ♻️ **Desalination Offset**
+
+                        Recovering this water avoids approximately  
+                        **{co2_saved_kg:.2f} kg CO₂ per month**
+                        """)
+
+                with c2:
+                        st.markdown(f"""
+                        🚗 **Driving Equivalent**
+
+                        That equals roughly  
+                        **{km_equivalent:.1f} km** of petrol car emissions
+                        """)
+
+                # ---------------------------------------------------
+                # HUMIDITY INSIGHT
+                # ---------------------------------------------------
+                st.markdown("---")
+                st.subheader("💨 Climate Insight")
 
                 st.markdown(f"""
-                <div style="background-color: #0e1621; border: 1px solid #2ecc71; padding: 25px; border-radius: 15px; height: 100%;">
-                    <h3 style="color: #2ecc71; font-family: 'Poppins', sans-serif; margin-top:0;">🌿 The Green Badge</h3>
-                    <p style="font-size:18px; color: #f8f9fa;">
-                        Desalinating water in the UAE is energy-intensive. 
-                    </p>
-                    <div style="text-align:center; padding: 10px;">
-                        <span style="font-size:40px;">🛡️</span>
-                        <h4 style="margin:10px 0; color:#2ecc71;">Monthly CO2 Offset: {total_co2_saved:.1f}g</h4>
-                        <p style="font-size:16px; opacity:0.8;">
-                            Equivalent to avoiding <b>{km_equivalent:.2f} km</b> of driving in a petrol car.
-                        </p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                Current Relative Humidity: **{humidity}%**
 
-            st.markdown("---")
-            st.markdown('<h2 style="font-size:32px;">How to Recover this Water</h2>', unsafe_allow_html=True)
-            
-            r_col1, r_col2 = st.columns(2)
-            with r_col1:
-                st.markdown(f"""
-                <div class="big-text">
-                <b>1. The Simple Setup (Gravity Feed)</b><br>
-                Most UAE apartments have a drainage pipe on the balcony. Simply reroute this pipe into a 20L BPA-free bucket.<br><br>
-                <b>2. Filtration Tip</b><br>
-                While the water is distilled-quality, it can pick up dust from the coils. Use a simple mesh filter to keep it debris-free.
-                </div>
-                """, unsafe_allow_html=True)
-            with r_col2:
-                st.markdown(f"""
-                <div class="big-text">
-                <b>3. Storage & Safety</b><br>
-                Keep your collection tank covered to prevent mosquito breeding. Use the water within 48 hours for the best results.<br><br>
-                <b>4. Maintenance</b><br>
-                Check the collection bucket once a day to prevent overflows during high-humidity months.
-                </div>
-                """, unsafe_allow_html=True)
+                Higher humidity increases condensate production.
+                The model automatically adjusts within realistic HVAC operating limits.
+                """)
+                st.markdown("</div>", unsafe_allow_html=True)
+
 
         if wfeature_choice == "Solar-Water Nexus (Desalination)":
             st.markdown("""
@@ -781,3 +787,5 @@ else:
             peak_ref = (solar_capacity_kw * 0.85 * 1000 / 1000) / RO_ENERGY_INTENSITY * 1000
             yield_curve = [max(0, math.sin(math.pi * (h-6)/12)) * peak_ref for h in h_axis]
             st.area_chart(pd.DataFrame({"Liters Generated per Hour": yield_curve}, index=h_axis))
+
+
