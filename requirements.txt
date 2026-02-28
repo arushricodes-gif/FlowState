@@ -7,3 +7,4 @@ plotly
 folium
 streamlit-folium
 streamlit-js-eval
+scipy
