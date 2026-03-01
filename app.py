@@ -941,47 +941,45 @@ else:
             st.line_chart(data.set_index("Date"))
 
             st.markdown("---")
-            st.markdown("## 🧠 Proposed Engineering Solution")
-            
-            st.markdown("### AI Water Quality Optimization & Control System (AWQOCS)")
+                       
+            st.markdown("## 🤖 AI Anomaly Detection & Smart Recommendations")
 
-            st.write(
-                """
-                The AI Water Quality Optimization & Control System (AWQOCS) is a 
-                centralized software-based engineering solution designed to enhance 
-                desalination and water distribution efficiency across the UAE.
+            # Rolling statistics for anomaly detection
+            rolling_mean = data.set_index("Date").rolling(window=7).mean()
+            rolling_std = data.set_index("Date").rolling(window=7).std()
 
-                Unlike traditional monitoring systems that only display water metrics,
-                AWQOCS actively analyzes real-time sensor data and generates intelligent
-                operational recommendations to optimize treatment processes.
-                """
-            )
+            latest_values = data.iloc[-1]
 
-            st.markdown("### ⚙️ How It Works")
+            anomalies = []
 
-            st.write(
-                """
-                1. **Real-Time Data Integration:** Continuous ingestion of pH, turbidity,
-                   salinity, contaminant levels, temperature, and flow rate data from
-                   distributed IoT sensors.
+            for metric in ["pH", "Turbidity", "Salinity", "Contaminants"]:
+                mean_val = rolling_mean[metric].iloc[-1]
+                std_val = rolling_std[metric].iloc[-1]
+                current_val = latest_values[metric]
 
-                2. **AI Decision Engine:** Machine learning models perform:
-                   • Predictive trend forecasting  
-                   • Anomaly detection  
-                   • Chemical dosing optimization  
-                   • Membrane fouling prediction  
+                # If value is more than 2 standard deviations away
+                if abs(current_val - mean_val) > 2 * std_val:
+                    anomalies.append(metric)
 
-                3. **Automated Recommendations:** The system generates optimal
-                   operational adjustments such as:
-                   • Adjusting chemical dosing levels  
-                   • Modifying filtration cycles  
-                   • Regulating flow distribution  
-                   • Triggering early maintenance alerts  
+            if anomalies:
+                st.error(f"🚨 Anomaly Detected in: {', '.join(anomalies)}")
+            else:
+                st.success("✅ No significant anomalies detected in current cycle.")
 
-                4. **Operator Interface:** Control rooms receive actionable insights
-                   or enable semi/fully automated correction through SCADA systems.
-                """
-            )
+            if "pH" in anomalies:
+                st.warning("Adjust alkaline dosing pump to stabilize pH levels.")
+
+            if "Turbidity" in anomalies:
+                st.warning("Increase filtration cycle intensity to reduce turbidity.")
+
+            if "Salinity" in anomalies:
+                st.warning("Modify desalination blending ratio to optimize salinity.")
+
+            if "Contaminants" in anomalies:
+                st.warning("Initiate targeted flushing protocol and inspect pipeline segment.")
+
+            if not anomalies:
+                st.info("System operating within optimal parameters. No corrective action required.")
 
             st.markdown("### 🌍 Sustainability Impact for UAE")
 
