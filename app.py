@@ -940,7 +940,7 @@ else:
 
             st.line_chart(data.set_index("Date"))
 
-                        st.markdown("---")
+            st.markdown("---")
             st.markdown("## 🧠 Proposed Engineering Solution")
             
             st.markdown("### AI Water Quality Optimization & Control System (AWQOCS)")
