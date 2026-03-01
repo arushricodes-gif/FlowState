@@ -388,12 +388,13 @@ else:
 
 
     with tab_waterfeatures:
-        wfeature_choice = st.selectbox("Analysis Tool", ["Water Stress Score (WSS)", "AC Condesate Estimator", "Solar-Water Nexus (Desalination)"])
+        wfeature_choice = st.selectbox("Analysis Tool", ["Water Stress Score (WSS)", "AC Condesate Estimator", "Solar-Water Nexus (Desalination)", "Water Quality Monitoring"])
         # Pull environment data once for both tools
         env = st.session_state.env_data
         u_lat, u_lon = st.session_state.coords[0], st.session_state.coords[1]
 
         if wfeature_choice == "Water Stress Score (WSS)":
+
             # 1. Processing logic
             m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(
                 city_info, sim_time, radius_meters, u_lat, u_lon
@@ -788,4 +789,168 @@ else:
             yield_curve = [max(0, math.sin(math.pi * (h-6)/12)) * peak_ref for h in h_axis]
             st.area_chart(pd.DataFrame({"Liters Generated per Hour": yield_curve}, index=h_axis))
 
+        if wfeature_choice == "Water Quality Monitoring":
+
+            st.subheader("💧 Water Quality Monitoring & Alerts")
+            st.markdown("### 📘 Standards & Regulatory Alignment")
+
+            st.info(
+                """
+                This monitoring module follows internationally recognized drinking water
+                quality standards including:
+
+                • World Health Organization (WHO) Drinking Water Guidelines  
+                • UAE National Drinking Water Standards  
+                • Gulf Standardization Organization (GSO) limits  
+
+                Threshold ranges are aligned with recommended safe values for potable water.
+                """
+            )
+
+            st.markdown(
+                """
+                #### 📊 Safe Reference Ranges Used
+
+                | Parameter | Recommended Safe Range | Sustainability Relevance |
+                |------------|------------------------|---------------------------|
+                | pH | 6.5 – 8.5 | Prevents pipe corrosion & ecosystem damage |
+                | Turbidity (NTU) | < 5 NTU | Indicates clarity & filtration efficiency |
+                | Salinity (ppm) | < 500 ppm | Desalination efficiency indicator |
+                | Contaminants (mg/L) | < 0.05 mg/L | Public health protection |
+
+                These values reflect global potable water standards and regional desalination benchmarks.
+                """
+            )
+
+            with st.expander("🔬 Methodology & Data Assumptions"):
+                st.write(
+                    """
+                    This module simulates a real-time water quality monitoring system similar to
+                    those deployed in municipal desalination plants and distribution networks.
+                    In practice, IoT-based water sensors continuously measure parameters such as
+                    pH, turbidity, salinity, and trace contaminants at treatment facilities and
+                    across pipeline nodes. The collected data is transmitted to a centralized
+                    analytics platform where rule-based thresholds and anomaly detection logic
+                    evaluate water safety in real time. When values move outside recommended
+                    ranges, the system triggers alerts to support rapid operational response.
+
+                    The safety thresholds implemented in this model align with internationally
+                    recognized drinking water standards and UAE regulatory benchmarks.
+                    By combining continuous monitoring, automated alerting, and historical
+                    trend analysis, the system supports proactive water management,
+                    infrastructure protection, and long-term sustainability planning
+                    in arid regions such as the UAE.
+                    """
+                )
+
+            location = st.selectbox(
+                "Select Emirate",
+                ["Dubai", "Abu Dhabi", "Sharjah"]
+            )
+
+            location_bias = {
+                "Dubai": 0,
+                "Abu Dhabi": 0.2,
+                "Sharjah": -0.1
+            }
+
+            bias = location_bias[location]
+
+            # ---------------------------
+            # Generate Sample Data
+            # ---------------------------
+            ph = round(np.random.normal(7.4 + bias, 0.3), 2)
+            turbidity = round(np.random.normal(3 + bias, 1.2), 2)
+            salinity = round(np.random.normal(450 + bias*100, 120), 2)
+            contaminants = round(np.random.normal(0.04 + bias*0.01, 0.02), 3)
+
+            # ---------------------------
+            # Status Logic
+            # ---------------------------
+            def get_status(value, metric):
+                thresholds = {
+                    "pH": {"ok": (6.5, 8.5), "warn": (6.0, 9.0)},
+                    "Turbidity": {"ok": (0, 5), "warn": (0, 10)},
+                    "Salinity": {"ok": (0, 500), "warn": (0, 1000)},
+                    "Contaminants": {"ok": (0, 0.05), "warn": (0, 0.1)},
+                }
+
+                ok_low, ok_high = thresholds[metric]["ok"]
+                warn_low, warn_high = thresholds[metric]["warn"]
+
+                if ok_low <= value <= ok_high:
+                    return "OK"
+                elif warn_low <= value <= warn_high:
+                    return "Warning"
+                else:
+                    return "Critical"
+
+            # ---------------------------
+            # KPI Display
+            # ---------------------------
+            col1, col2, col3, col4 = st.columns(4)
+
+            metrics = {
+                "pH": ph,
+                "Turbidity": turbidity,
+                "Salinity": salinity,
+                "Contaminants": contaminants
+            }
+
+            for col, (name, value) in zip([col1, col2, col3, col4], metrics.items()):
+                status = get_status(value, name)
+
+                if status == "OK":
+                    color = "🟢"
+                elif status == "Warning":
+                    color = "🟡"
+                else:
+                    color = "🔴"
+
+                col.metric(label=name, value=value, delta=f"{color} {status}")
+
+            # ---------------------------
+            # Alerts
+            # ---------------------------
+            for name, value in metrics.items():
+                status = get_status(value, name)
+                if status == "Critical":
+                    st.error(f"🚨 CRITICAL ALERT in {location}: {name} levels unsafe!")
+                elif status == "Warning":
+                    st.warning(f"⚠️ Warning in {location}: {name} approaching unsafe range.")
+
+            # ---------------------------
+            # Historical Trend
+            # ---------------------------
+            st.markdown("### 📈 30-Day Quality Trend")
+
+            days = pd.date_range(end=pd.Timestamp.today(), periods=30)
+
+            data = pd.DataFrame({
+                "Date": days,
+                "pH": np.random.normal(7.4 + bias, 0.3, 30),
+                "Turbidity": np.random.normal(3 + bias, 1.2, 30),
+                "Salinity": np.random.normal(450 + bias*100, 120, 30),
+                "Contaminants": np.random.normal(0.04 + bias*0.01, 0.02, 30),
+            })
+
+            st.line_chart(data.set_index("Date"))
+
+            st.markdown("### 🌍 Why This Matters for UAE Sustainability")
+
+            st.write(
+                """
+                In arid regions like the UAE, over 90% of potable water is produced through
+                desalination. Continuous monitoring of salinity, turbidity, and contaminant
+                levels ensures:
+
+                • Energy-efficient desalination operations  
+                • Reduced environmental discharge impact  
+                • Safe public distribution networks  
+                • Protection of marine ecosystems  
+
+                Real-time alert systems reduce infrastructure risk and
+                improve long-term water resilience under the UAE Water Security Strategy 2036.
+                """
+            )
 
