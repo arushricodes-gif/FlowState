@@ -940,21 +940,66 @@ else:
 
             st.line_chart(data.set_index("Date"))
 
-            st.markdown("### 🌍 Why This Matters for UAE Sustainability")
+                        st.markdown("---")
+            st.markdown("## 🧠 Proposed Engineering Solution")
+            
+            st.markdown("### AI Water Quality Optimization & Control System (AWQOCS)")
 
             st.write(
                 """
-                In arid regions like the UAE, over 90% of potable water is produced through
-                desalination. Continuous monitoring of salinity, turbidity, and contaminant
-                levels ensures:
+                The AI Water Quality Optimization & Control System (AWQOCS) is a 
+                centralized software-based engineering solution designed to enhance 
+                desalination and water distribution efficiency across the UAE.
 
-                • Energy-efficient desalination operations  
-                • Reduced environmental discharge impact  
-                • Safe public distribution networks  
-                • Protection of marine ecosystems  
-
-                Real-time alert systems reduce infrastructure risk and
-                improve long-term water resilience under the UAE Water Security Strategy 2036.
+                Unlike traditional monitoring systems that only display water metrics,
+                AWQOCS actively analyzes real-time sensor data and generates intelligent
+                operational recommendations to optimize treatment processes.
                 """
             )
 
+            st.markdown("### ⚙️ How It Works")
+
+            st.write(
+                """
+                1. **Real-Time Data Integration:** Continuous ingestion of pH, turbidity,
+                   salinity, contaminant levels, temperature, and flow rate data from
+                   distributed IoT sensors.
+
+                2. **AI Decision Engine:** Machine learning models perform:
+                   • Predictive trend forecasting  
+                   • Anomaly detection  
+                   • Chemical dosing optimization  
+                   • Membrane fouling prediction  
+
+                3. **Automated Recommendations:** The system generates optimal
+                   operational adjustments such as:
+                   • Adjusting chemical dosing levels  
+                   • Modifying filtration cycles  
+                   • Regulating flow distribution  
+                   • Triggering early maintenance alerts  
+
+                4. **Operator Interface:** Control rooms receive actionable insights
+                   or enable semi/fully automated correction through SCADA systems.
+                """
+            )
+
+            st.markdown("### 🌍 Sustainability Impact for UAE")
+
+            st.write(
+                """
+                In a country where over 90% of potable water is desalinated,
+                optimizing treatment processes significantly reduces energy
+                consumption and operational costs.
+
+                Projected Benefits:
+                • 8–15% reduction in chemical usage  
+                • 5–12% reduction in desalination energy demand  
+                • Faster contamination response time  
+                • Extended infrastructure lifespan  
+                • Improved alignment with UAE Water Security Strategy 2036  
+
+                By shifting from reactive monitoring to predictive optimization,
+                this AI-driven system strengthens long-term water resilience
+                in arid environments.
+                """
+            )
