@@ -791,8 +791,12 @@ else:
 
         if wfeature_choice == "Water Quality Monitoring":
 
-            st.subheader("💧 Water Quality Monitoring & Alerts")
-            st.markdown("### 📘 Standards & Regulatory Alignment")
+            st.markdown("""
+                <div style="text-align: center;">
+                    <h1 style="color: #f39c12; font-family: 'Poppins', sans-serif;">Water Quality Monitoring & Alerts</h1>
+                    <p style="font-size: 18px; opacity: 0.8;">Standards & Regulatory Alignment</p>
+                </div>
+            """, unsafe_allow_html=True)
 
             st.info(
                 """
